@@ -33,3 +33,6 @@ _helpers.tpl
 
 
 
+__pycache__/
+*.pyc
+.venv/
