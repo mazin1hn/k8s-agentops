@@ -113,3 +113,28 @@ def describe_pod(name: str, namespace: str):
         "containers": containers,
         "conditions": conditions,
     }
+
+def get_pod_events(name: str, namespace: str):
+    config.load_kube_config()
+
+    v1 = client.CoreV1Api()
+
+    events = v1.list_namespaced_event(
+        namespace=namespace.strip(),
+        field_selector=f"involvedObject.name={name.strip()}"
+    ).items
+
+    result = []
+
+    for event in events:
+        result.append(
+            {
+                "type": event.type,
+                "reason": event.reason,
+                "message": event.message,
+                "count": event.count,
+                "last_seen": str(event.last_timestamp),
+            }
+        )
+
+    return result
