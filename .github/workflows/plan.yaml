@@ -32,9 +32,6 @@ jobs:
       working-directory: infra
       run: terraform fmt --recursive
 
-    - name: Debug OIDC claims
-      uses: github/actions-oidc-debugger@main
-
     - name: Configure AWS Credentials 
       uses: aws-actions/configure-aws-credentials@v4
       with:
