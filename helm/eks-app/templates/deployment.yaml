@@ -21,12 +21,12 @@ spec:
         - name: eks-game
           image: "{{ .Values.deployment.image }}:{{ .Values.deployment.tag }}"
           ports:
-            - containerPort: 3000
+            - containerPort: 80
          
           readinessProbe:
             httpGet:
               path: /
-              port: 3000
+              port: 80
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 3
