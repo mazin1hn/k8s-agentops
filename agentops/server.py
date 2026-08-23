@@ -12,6 +12,8 @@ from tools.argocd import (
     list_argocd_apps,
 )
 
+from tools.prometheus import query_prometheus
+
 mcp = MCPServer("AgentOps")
 
 
@@ -65,6 +67,13 @@ def argocd_apps():
     List ArgoCD applications and flag unhealthy or out-of-sync apps.
     """
     return list_argocd_apps()
+
+@mcp.tool()
+def prometheus_query(query: str):
+    """
+    Run a read-only Prometheus instant query and return the result.
+    """
+    return query_prometheus(query)
 
 
 if __name__ == "__main__":
