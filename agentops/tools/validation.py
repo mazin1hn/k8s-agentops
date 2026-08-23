@@ -1,10 +1,11 @@
 import subprocess
 import tempfile
 from pathlib import Path
-from tools.remediation import DEPLOYMENT_FILE
+
+from tools.remediation import DEPLOYMENT_FILE, REPO_ROOT
 
 
-CHART_DIR = Path("helm/eks-app")
+CHART_DIR = REPO_ROOT / "helm" / "eks-app"
 
 
 def validate_readiness_probe_change(new_port: int):

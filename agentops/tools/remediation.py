@@ -3,9 +3,15 @@ from difflib import unified_diff
 import re
 
 
-DEPLOYMENT_FILE = Path("helm/eks-app/templates/deployment.yaml")
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
-
+DEPLOYMENT_FILE = (
+    REPO_ROOT
+    / "helm"
+    / "eks-app"
+    / "templates"
+    / "deployment.yaml"
+)
 def propose_readiness_probe_port_fix(new_port: int):
     if not 1 <= new_port <= 65535:
         return {
