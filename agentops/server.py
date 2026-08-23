@@ -19,6 +19,8 @@ from tools.investigation import investigate_application
 from tools.remediation import propose_readiness_probe_port_fix
 from tools.validation import validate_readiness_probe_change
 
+from tools.gitops import prepare_readiness_fix
+
 mcp = MCPServer("AgentOps")
 
 
@@ -104,6 +106,16 @@ def validate_readiness_fix(new_port: int):
     policy checks and Helm validation without changing production.
     """
     return validate_readiness_probe_change(new_port)
+
+@mcp.tool()
+def prepare_readiness_remediation(new_port: int):
+    """
+    Prepare a validated Git remediation for the readiness probe.
+
+    This may create a local branch and commit, but it does not push,
+    open a pull request, merge, or modify Kubernetes directly.
+    """
+    return prepare_readiness_fix(new_port)
 
 
 if __name__ == "__main__":

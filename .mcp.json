@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "agentops": {
+      "type": "stdio",
+      "command": "/Users/mazin1hn/k8s-agentops/agentops/.venv/bin/python",
+      "args": [
+        "/Users/mazin1hn/k8s-agentops/agentops/server.py"
+      ],
+      "env": {}
+    }
+  }
+}
