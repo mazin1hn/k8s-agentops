@@ -1,7 +1,7 @@
-from mcp.server.fastmcp import FastMCP
+from mcp.server import MCPServer
 from tools.kubernetes import get_cluster_health
 
-mcp = FastMCP("AgentOps")
+mcp = MCPServer("AgentOps")
 
 
 @mcp.tool()
