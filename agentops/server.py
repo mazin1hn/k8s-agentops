@@ -14,6 +14,8 @@ from tools.argocd import (
 
 from tools.prometheus import query_prometheus
 
+from tools.investigation import investigate_application
+
 mcp = MCPServer("AgentOps")
 
 
@@ -74,6 +76,14 @@ def prometheus_query(query: str):
     Run a read-only Prometheus instant query and return the result.
     """
     return query_prometheus(query)
+
+@mcp.tool()
+def investigate_app(app_name: str, namespace: str):
+    """
+    Investigate an application using ArgoCD, Kubernetes, and Prometheus data.
+    Returns concise health context and expands into logs/events only when issues are detected.
+    """
+    return investigate_application(app_name, namespace)
 
 
 if __name__ == "__main__":
