@@ -7,7 +7,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/mazin1hn/eks.git
+    repoURL: https://github.com/mazin1hn/k8s-agentops.git
     targetRevision: main
     path: helm/eks-app
 
