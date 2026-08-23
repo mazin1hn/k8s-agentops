@@ -7,6 +7,8 @@ from tools.kubernetes import (
     get_pod_events,
 )
 
+from tools.argocd import get_argocd_app_health
+
 mcp = MCPServer("AgentOps")
 
 
@@ -46,6 +48,13 @@ def pod_events(name: str, namespace: str):
     Return Kubernetes events associated with a pod.
     """
     return get_pod_events(name, namespace)
+
+@mcp.tool()
+def argocd_app_health(app_name: str):
+    """
+    Return ArgoCD sync and health status for an application.
+    """
+    return get_argocd_app_health(app_name)
 
 
 if __name__ == "__main__":
