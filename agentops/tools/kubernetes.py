@@ -51,3 +51,21 @@ def list_pods(namespace="default"):
         )
 
     return result
+
+
+def get_pod_logs(name: str, namespace: str, tail_lines: int = 100):
+    config.load_kube_config()
+
+    v1 = client.CoreV1Api()
+
+    logs = v1.read_namespaced_pod_log(
+        name=name,
+        namespace=namespace,
+        tail_lines=tail_lines,
+    )
+
+    return {
+        "pod": name,
+        "namespace": namespace,
+        "logs": logs,
+    }
