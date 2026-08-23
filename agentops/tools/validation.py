@@ -1,8 +1,7 @@
 import subprocess
 import tempfile
 from pathlib import Path
-
-from agentops.tools.remediation import DEPLOYMENT_FILE
+from tools.remediation import DEPLOYMENT_FILE
 
 
 CHART_DIR = Path("helm/eks-app")
