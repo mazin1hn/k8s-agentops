@@ -2,6 +2,36 @@ from kubernetes import client, config
 
 
 def get_cluster_health():
+    
+    from kubernetes import client, config
+
+def list_pods(namespace="default"):
+
+    config.load_kube_config()
+
+    v1 = client.CoreV1Api()
+
+    pods = v1.list_namespaced_pod(namespace).items
+
+    result = []
+
+    for pod in pods:
+
+        result.append(
+
+            {
+
+                "name": pod.metadata.name,
+
+                "status": pod.status.phase,
+
+                "node": pod.spec.node_name,
+
+            }
+
+        )
+
+    return result
     config.load_kube_config()
 
     v1 = client.CoreV1Api()
