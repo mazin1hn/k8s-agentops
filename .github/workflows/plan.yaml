@@ -1,15 +1,17 @@
 name: Plan Infrastructure
 
 on:
-  workflow_run:
-    workflows: ["Build and Push Docker Image to ECR Repo"]
-    branches: [main]
-    types:
-      - completed
+ workflow_dispatch:
+   inputs:
+     choice:
+      description: "Type 'confirm' to destroy infrastructure"
+      required: true 
+      type: string 
+      default: ""
 
 jobs:
   build:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.inputs.choice == 'confirm' }}
     runs-on: ubuntu-latest
 
     permissions:
