@@ -7,7 +7,10 @@ from tools.kubernetes import (
     get_pod_events,
 )
 
-from tools.argocd import get_argocd_app_health
+from tools.argocd import (
+    get_argocd_app_health,
+    list_argocd_apps,
+)
 
 mcp = MCPServer("AgentOps")
 
@@ -55,6 +58,13 @@ def argocd_app_health(app_name: str):
     Return ArgoCD sync and health status for an application.
     """
     return get_argocd_app_health(app_name)
+
+@mcp.tool()
+def argocd_apps():
+    """
+    List ArgoCD applications and flag unhealthy or out-of-sync apps.
+    """
+    return list_argocd_apps()
 
 
 if __name__ == "__main__":
