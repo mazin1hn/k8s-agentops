@@ -67,7 +67,7 @@ def get_pod_logs(name: str, namespace: str, tail_lines: int = 100):
     return {
         "pod": name,
         "namespace": namespace,
-        "logs": logs,
+        "logs": logs.decode("utf-8") if isinstance(logs, bytes) else logs,
     }
 
 def describe_pod(name: str, namespace: str):
