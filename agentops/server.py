@@ -16,6 +16,9 @@ from tools.prometheus import query_prometheus
 
 from tools.investigation import investigate_application
 
+from tools.remediation import propose_readiness_probe_port_fix
+from tools.validation import validate_readiness_probe_change
+
 mcp = MCPServer("AgentOps")
 
 
@@ -84,6 +87,23 @@ def investigate_app(app_name: str, namespace: str):
     Returns concise health context and expands into logs/events only when issues are detected.
     """
     return investigate_application(app_name, namespace)
+
+@mcp.tool()
+def propose_readiness_fix(new_port: int):
+    """
+    Propose a readiness probe port change.
+    This does not modify files, Git, ArgoCD, or Kubernetes.
+    """
+    return propose_readiness_probe_port_fix(new_port)
+
+
+@mcp.tool()
+def validate_readiness_fix(new_port: int):
+    """
+    Validate a proposed readiness probe port change using
+    policy checks and Helm validation without changing production.
+    """
+    return validate_readiness_probe_change(new_port)
 
 
 if __name__ == "__main__":
