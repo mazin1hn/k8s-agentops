@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prometheus-ingress
+  namespace: prometheus
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    acme.cert-manager.io/http01-edit-in-place: "true"
+    external-dns.alpha.kubernetes.io/hostname: prometheus.mazin1hn.uk
+
+spec:
+  ingressClassName: traefik
+
+  rules:
+    - host: prometheus.mazin1hn.uk
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus-kube-prometheus-prometheus
+                port:
+                  number: 9090
+
+  tls:
+    - hosts:
+        - prometheus.mazin1hn.uk
+      secretName: prometheus-tls

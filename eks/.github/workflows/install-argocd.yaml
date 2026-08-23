@@ -1,0 +1,67 @@
+name: Install ArgoCD
+
+on:
+  workflow_run:
+    workflows: ["Apply Infrastructure"]
+    branches: [main]
+    types:
+      - completed
+
+jobs:
+  build:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    permissions:
+     id-token: write 
+     contents: read
+
+    steps:
+
+    - name: Checkout Code 
+      uses: actions/checkout@v4
+  
+    - name: Configure AWS Credentials 
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+       role-to-assume: ${{ secrets.AWS_EKS_ROLE }}
+       aws-region: eu-west-2
+
+    - name: Configure kubeconfig
+      run: aws eks update-kubeconfig --region eu-west-2 --name eks_cluster
+
+    - name: Create ArgoCD Namespace 
+      run: kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Install ArgoCD
+      run: kubectl create -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+    - name: Expose ArgoCD via LoadBalancer
+      run: |
+        kubectl patch svc argocd-server -n argocd \
+          -p '{"spec": {"type": "LoadBalancer"}}'
+
+    - name: Return External Address
+      run: kubectl get svc argocd-server -n argocd
+
+    - name: Wait for ArgoCD API Server 
+      run: kubectl rollout status deployment/argocd-server -n argocd --timeout=10m
+
+    - name: Apply ArgoCD root app 
+      run: kubectl apply -n argocd -f argocd/root-app.yaml
+
+    - name: Wait for cert-manager namespace
+      run: |
+       until kubectl get namespace cert-manager >/dev/null 2>&1; do
+         sleep 2
+       done
+
+    - name: Copy secret to cert-manager
+      run: |
+         kubectl get secret cloudflare-api-token -n kube-system -o yaml \
+         | sed 's/namespace: kube-system/namespace: cert-manager/' \
+         | kubectl apply -f -
+
+    - name: Notify success
+      if: success()
+      run: echo Success! ArgoCD has been installed and configured!

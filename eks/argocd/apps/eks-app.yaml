@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: eks-app
+  namespace: argocd   
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/mazin1hn/eks.git
+    targetRevision: main
+    path: helm/eks-app
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: eks-app
+
+  syncPolicy:
+    automated:
+      enabled: true 
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

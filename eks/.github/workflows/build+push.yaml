@@ -1,0 +1,78 @@
+name: Build and Push Docker Image to ECR Repo
+
+on:
+ workflow_dispatch:
+   inputs:
+     choice:
+      description: "Type 'confirm' to build and push docker image to ECR Repository"
+      required: true 
+      type: string 
+      default: ""
+
+env:
+ ECR_REPO: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-2.amazonaws.com/eks
+ IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build:
+   if: ${{ github.event.inputs.choice == 'confirm' }}
+   runs-on: ubuntu-latest
+
+   permissions:
+    id-token: write
+    contents: write
+
+   steps:
+   - name: Checkout Code 
+     uses: actions/checkout@v4
+
+   - name: Configure AWS Credentials 
+     uses: aws-actions/configure-aws-credentials@v4
+     with:
+       role-to-assume: ${{ secrets.AWS_ECR_ROLE }}
+       aws-region: eu-west-2
+
+   - name: Login to ECR 
+     uses: aws-actions/amazon-ecr-login@v2
+
+   - name: Build Docker Image
+     run: docker build -t $ECR_REPO:$IMAGE_TAG ./app
+
+   - name: Run Trivy image scanning
+     uses: aquasecurity/trivy-action@master
+     with:
+      image-ref: ${{ env.ECR_REPO }}:${{ env.IMAGE_TAG }}
+      format: "table"
+      output: trivy-results.txt
+      exit-code: 0
+      ignore-unfixed: true
+      severity: "CRITICAL,HIGH"
+
+   - name: Publish Trivy table as an artifact
+     uses: actions/upload-artifact@v4
+     with:
+      name: trivy-table-results
+      path: trivy-results.txt
+
+   - name: Push Docker Image 
+     run: docker push $ECR_REPO:$IMAGE_TAG
+
+   - name: Update Helm values image tag
+     run: |
+       yq -i '.deployment.tag = strenv(IMAGE_TAG)' helm/eks-app/values.yaml
+       echo "Updated values.yaml:"
+       cat helm/eks-app/values.yaml
+
+   - name: Commit and push Helm tag update
+     run: |
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        git add helm/eks-app/values.yaml
+        git commit -m "chore(eks-app): bump image tag to $IMAGE_TAG" || echo "No changes to commit"
+
+        git pull --rebase origin main
+        git push origin HEAD:main
+
+   - name: Notify success
+     if: success()
+     run: echo Success! Your Docker image has been built and pushed!

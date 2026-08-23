@@ -1,0 +1,35 @@
+################################
+# Terraform
+################################
+.terraform/
+.terraform.lock.hcl
+
+*.tfstate
+*.tfstate.*
+*.tfvars.json
+
+
+terraform.tfplan
+terraform.plan
+crash.log
+
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+################################
+# App
+################################
+
+.sass-cache/
+
+################################
+# Helm
+################################
+
+NOTES.txt
+_helpers.tpl
+
+
+

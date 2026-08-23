@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eks-app-deployment
+  labels:
+    app: eks
+
+spec:
+  replicas: 9
+  selector:
+    matchLabels:
+      app: eks
+
+  template:
+    metadata:
+      labels:
+        app: eks
+
+    spec:
+      containers:
+        - name: eks-game
+          image: "{{ .Values.deployment.image }}:{{ .Values.deployment.tag }}"
+          ports:
+            - containerPort: 3000
+
+    
+ 

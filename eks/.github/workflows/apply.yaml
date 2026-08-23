@@ -1,0 +1,58 @@
+name: Apply Infrastructure
+
+on:
+  workflow_run:
+    workflows: ["Plan Infrastructure"]
+    branches: [main]
+    types:
+      - completed
+ 
+jobs:
+  build:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    permissions:
+     id-token: write
+     contents: read
+
+    steps: 
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform 
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Setup Terraform Lint 
+      uses: terraform-linters/setup-tflint@v6
+
+    - name: Terraform fmt
+      working-directory: infra
+      run: terraform fmt --recursive
+
+    - name: Configure AWS Credentials 
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+       role-to-assume: ${{ secrets.AWS_EKS_ROLE }}
+       aws-region: eu-west-2
+
+    - name: Terraform Init 
+      working-directory: infra
+      run: terraform init 
+
+    - name: Terraform Apply 
+      working-directory: infra
+      run: terraform apply -auto-approve
+
+    #Create K8s Secret
+
+    - name: Configure kubeconfig
+      run: aws eks update-kubeconfig --region eu-west-2 --name eks_cluster
+
+    - name: Create Cloudflare token secret
+      run: |
+        kubectl create secret generic cloudflare-api-token \
+          -n kube-system \
+          --from-literal=api-token='${{ secrets.CF_API_TOKEN }}' \
+          --dry-run=client -o yaml | kubectl apply -f - \
+          --validate=false

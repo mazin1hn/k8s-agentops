@@ -1,0 +1,44 @@
+name: Terraform Destroy
+
+on:
+ workflow_dispatch:
+   inputs:
+     choice:
+      description: "Type 'confirm' to destroy infrastructure"
+      required: true 
+      type: string 
+      default: ""
+
+jobs:
+  build:
+    if: ${{ github.event.inputs.choice == 'confirm' }}
+    runs-on: ubuntu-latest
+
+    permissions:
+     id-token: write
+     contents: read
+
+    steps: 
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials 
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+       role-to-assume: ${{ secrets.AWS_EKS_ROLE }}
+       aws-region: eu-west-2
+
+    - name: Setup Terraform 
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Terraform init
+      working-directory: infra
+      run: terraform init
+
+    - name: Terraform Destroy
+      working-directory: infra
+      run: terraform destroy --auto-approve
+
+    - name: Notify success
+      if: success()
+      run: echo Success! Your infrastructure has been destroyed!
